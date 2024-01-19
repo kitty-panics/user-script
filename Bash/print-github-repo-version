@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+#
+# Print Github Repo Version
+#
+
+GITHUB_REPO="$1"
+GITHUB_API="https://api.github.com/repos/$(echo "$GITHUB_REPO" | cut -d'/' -f4,5)"
+REQ_URL="${GITHUB_API}/commits?per_page=1"
+
+#COMMIT_COUNT=$(curl -sI "${REQ_URL}" | grep '^link' | cut -d'=' -f6 | cut -d'>' -f1)
+COMMIT_COUNT=$(curl -sI "${REQ_URL}" | sed -n '/^link:/s/.*next.*&page=\([0-9]*\).*/\1/p')
+
+#LAST_COMMIT=$(curl -s "${REQ_URL}" | grep '^    "sha"' | cut -d'"' -f4 | cut -c 1-10)
+LAST_COMMIT=$(curl -s "${REQ_URL}" | sed -n '/^    "sha"/s/.*sha.*"\([0-9a-z]*\)",/\1/p' | cut -c 1-10)
+
+printf "r%s.%s" "${COMMIT_COUNT}" "${LAST_COMMIT}"
